@@ -1,0 +1,27 @@
+Andrei Alin-Ionut 333CC
+
+Tema1 APD
+
+Implementarea se rezuma l-a for-ul din functia cmpfunc pe care l-am paralelizat.
+
+In tema1_par.c doar am extras numarul de thread-uri si l-am trimis functiei
+run_genetic_algorithm.
+
+Am creat o structura numita date aflata in "date.h" pe care o folosesc pentu a
+pasa functiei de thread argumentele (id-ul thread-ului, numarul de elemente din
+vectorul current_generation, numarul de thread-uri, si vectorul cu generatia
+curenta).
+
+In functia de thread "thread_function" am calculat start si end, apoi pentru 
+fiecare individ din intervalul start - end am caculuat count.
+
+Am modificat structura "individual", am mai adugat un camp "count" in care 
+stochez suma valorilor ccromozomi-lor ale acelui individ.
+
+Am folosit acel "count" aflat la fiecare individ in functia cmpfunc pentru a
+elimnia for-ul din varainta neparalelizata, acel for a fost deja calulat
+paralel si valoarea sa stocata in count.
+
+Am folosit mereu thread-urile pentru a calcula count  inainte de fiecare 
+qsort.
+
