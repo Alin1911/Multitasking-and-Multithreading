@@ -65,12 +65,35 @@ int main(int argc, char * argv[]) {
 		qsort(vQSort, nProcesses - 1, sizeof(int), cmp);
 
 		// TODO sort the vector v
+		for (int i = 0; i < nProcesses - rank; i++) {
+            MPI_Send(&v[i], 1, MPI_INT, rank + 1, 0, MPI_COMM_WORLD);
+        }
+
+        for (int i = 1; i < nProcesses; i++) {
+            MPI_Recv(&v[i - 1], 1, MPI_INT, i, 0, MPI_COMM_WORLD, NULL);
+        }
 
 
 		displayVector(v);
 		compareVectors(v, vQSort);
 	} else {
 		// TODO sort the vector v
+        int recv;
+
+		MPI_Recv(&recv, 1, MPI_INT, (rank - 1), 0, MPI_COMM_WORLD, NULL);
+		int aux1 = recv;
+
+		for (int i = 1; i <  nProcesses - rank ; i++) {
+            MPI_Recv(&recv, 1, MPI_INT, (rank - 1), 0, MPI_COMM_WORLD, NULL);
+			if(aux1 <= recv) {
+                MPI_Send(&recv, 1, MPI_INT, rank + 1, 0, MPI_COMM_WORLD);
+            } else {
+                MPI_Send(&aux1, 1, MPI_INT, rank + 1, 0, MPI_COMM_WORLD);
+                aux1 = recv;
+            }                
+        }
+        
+        MPI_Send(&aux1, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
 		
 	}
 

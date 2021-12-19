@@ -51,16 +51,17 @@ int main(int argc, char * argv[]) {
 	MPI_Comm_size(MPI_COMM_WORLD, &nProcesses);
 	printf("Hello from %i/%i\n", rank, nProcesses);
 
-    if (rank == MASTER) {
-        // generate random vector
-    }
-
+    // if (rank == MASTER) {
+    //     // generate random vector
+    // }
+	for(i = 0; i < N; i++)
+		v[i] = N - i;
     // send the vector to all processes
 
 
 	if(rank == 0) {
 		// DO NOT MODIFY
-		displayVector(v);
+		//displayVector(v);
 
 		// make copy to check it against qsort
 		// DO NOT MODIFY
@@ -69,15 +70,44 @@ int main(int argc, char * argv[]) {
 		qsort(vQSort, N, sizeof(int), cmp);
 
 		// sort the vector v
-		
-        // recv the new pozitions
+		for(i = 0; i < N / nProcesses; i++){
+			for (j = 0; j < N; j++){
+				if(v[rank * N / nProcesses + i] >v[j]){
+					pos[rank * N / nProcesses + i]++;
+				}
+			}
+		}
 
-		displayVector(v);
-		compareVectors(v, vQSort);
+		for(i = 1; i < nProcesses; i++){
+			MPI_Recv(&pos[i * N / nProcesses], N / nProcesses, MPI_INT, i, 0, MPI_COMM_WORLD, NULL);
+		}
+
+        // recv the new pozitions
+		int final_result[N];
+
+		for (i = 0; i < N; ++i){
+			final_result[i] = v[pos[i]];
+		}
+
+
+		displayVector(vQSort);
+		printf("==============\n");
+		displayVector(final_result);
+
+		compareVectors(final_result, vQSort);
 	} else {
 		
         // compute the positions
+		for(i = 0; i < N / nProcesses; i++){
+			for(j = 0; j < N; j++){
+				if (v[rank * N / nProcesses + i] > v[j]){
+					pos[rank * N / nProcesses + i]++;
+				}
+			}
+		}
+
         // send the new positions to process MASTER
+		MPI_Send(&pos[rank * N / nProcesses], N / nProcesses, MPI_INT, 0, 0, MPI_COMM_WORLD);
 	}
 
 	MPI_Finalize();
